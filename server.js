@@ -16,10 +16,19 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     console.log(`✅ Client connected: ${socket.id}`);
+    console.log(`✅ Client connected: ${socket.id}`);
 
-    // Listen for code updates and broadcast them to other clients
-    socket.on('code-update', (code) => {
-        socket.broadcast.emit('code-update', code);
+    // When a client joins a room
+    socket.on('joinRoom', (room) => {
+        socket.join(room);
+        console.log(`Socket ${socket.id} joined room ${room}`);
+    });
+
+    // Listen for code updates from a client, expecting an object with room and code
+    socket.on('code-update', (data) => {
+        const { room, code } = data;
+        // Emit only to the clients in the specified room, excluding the sender
+        socket.to(room).emit('code-update', code);
     });
 
     socket.on('disconnect', () => {
